@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+    <style>
+        .hero {
+            background: linear-gradient(rgba(11, 18, 32, 0.75), rgba(11, 18, 32, 0.92)), url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover;
+        }
+        .hero-content {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+        .search-bar {
+            display: flex;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 50px;
+            padding: 0.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .search-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 0 1.5rem;
+            font-size: 1.1rem;
+            outline: none;
+        }
+        .search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.65);
+        }
+        .search-bar .btn {
+            border-radius: 50px;
+            padding: 0.9rem 2rem;
+        }
+        .hero-categories {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .hero-cat-tag {
+            padding: 0.4rem 1.2rem;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .hero-cat-tag:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        .stats-section {
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <!-- Hero Section -->
+    <section class="hero text-center">
+        <div class="container hero-content">
+            <h1 style="font-size: 3.5rem; margin-bottom: 1rem;">Find Your Dream <span style="color: var(--accent-color);">Home</span> Today</h1>
+            <p style="font-size: 1.25rem; margin-bottom: 2rem;">Discover the most premium and exclusive properties in prime locations.</p>
+            
+            <form action="/properties" method="GET" class="search-bar">
+                <input type="text" name="search" placeholder="Search by city, location, or property type...">
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-search"></i> Search</button>
+            </form>
+
+            <div class="hero-categories">
+                <a href="/properties?category=Apartment" class="hero-cat-tag"><i class="fa-solid fa-building"></i> Apartments</a>
+                <a href="/properties?category=House" class="hero-cat-tag"><i class="fa-solid fa-house"></i> Houses</a>
+                <a href="/properties?category=Villa" class="hero-cat-tag"><i class="fa-solid fa-hotel"></i> Villas</a>
+                <a href="/properties?category=Commercial" class="hero-cat-tag"><i class="fa-solid fa-store"></i> Commercial</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="stats-section container">
+        <div class="glass-panel grid grid-cols-4">
+            <div class="stat-card" style="border-right: 1px solid var(--border-color);">
+                <div class="stat-number">20K+</div>
+                <div style="color: var(--text-secondary);">Properties</div>
+            </div>
+            <div class="stat-card" style="border-right: 1px solid var(--border-color);">
+                <div class="stat-number">500+</div>
+                <div style="color: var(--text-secondary);">Agents</div>
+            </div>
+            <div class="stat-card" style="border-right: 1px solid var(--border-color);">
+                <div class="stat-number">120+</div>
+                <div style="color: var(--text-secondary);">Cities</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">10K+</div>
+                <div style="color: var(--text-secondary);">Happy Clients</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Properties Section -->
+    <section class="container mt-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+                <h2>Featured Properties</h2>
+                <p style="margin: 0; font-size: 0.95rem;">Hand-picked listings for premium buyers</p>
+            </div>
+            <a href="/properties" class="btn btn-outline">Explore All <i class="fa-solid fa-arrow-right ml-1"></i></a>
+        </div>
+        
+        <div class="grid grid-cols-3">
+            <% if (featuredProperties && featuredProperties.length > 0) { %>
+                <% featuredProperties.forEach(property => { %>
+                    <% const isFav = typeof userFavorites !== 'undefined' && userFavorites.includes(property._id.toString()); %>
+                    <div class="property-card glass-panel" onclick="window.location.href='/properties/<%= property._id %>'" style="cursor: pointer;">
+                        <span class="badge"><%= property.category %></span>
+                        
+                        <button class="card-fav-btn <%= isFav ? 'active' : '' %>" onclick="toggleFavorite(event, '<%= property._id %>')" title="Toggle Favorite">
+                            <i class="fa-<%= isFav ? 'solid' : 'regular' %> fa-heart"></i>
+                        </button>
+
+                        <div class="property-image-wrapper">
+                            <img src="<%= property.images[0] || 'https://via.placeholder.com/400x300' %>" alt="<%= property.title %>" class="property-image">
+                        </div>
+
+                        <div class="property-content">
+                            <div class="property-price">$<%= property.price.toLocaleString() %></div>
+                            <h3 class="property-title"><%= property.title %></h3>
+                            <div class="property-location"><i class="fa-solid fa-location-dot"></i> <%= property.location %></div>
+                            <div class="property-features">
+                                <span><i class="fa-solid fa-bed"></i> <%= property.bedrooms %> Beds</span>
+                                <span><i class="fa-solid fa-bath"></i> <%= property.bathrooms %> Baths</span>
+                                <span><i class="fa-solid fa-vector-square"></i> <%= property.area %> sqft</span>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="glass-panel text-center" style="grid-column: 1 / -1; padding: 4rem;">
+                    <h3>No properties found</h3>
+                    <p>Be the first to list a property!</p>
+                </div>
+            <% } %>
+        </div>
+    </section>
+
+    <!-- Top Locations -->
+    <section class="container mb-3">
+        <h2 class="text-center mb-1">Top Locations</h2>
+        <p class="text-center mb-2">Explore properties in major high-growth cities</p>
+        
+        <div class="grid grid-cols-4">
+            <a href="/properties?search=Mumbai" class="city-card glass-panel text-center">
+                <div class="city-emoji">🏙️</div>
+                <h3>Mumbai</h3>
+                <p>2,840 Properties</p>
+            </a>
+            <a href="/properties?search=Delhi" class="city-card glass-panel text-center">
+                <div class="city-emoji">🌆</div>
+                <h3>Delhi NCR</h3>
+                <p>2,210 Properties</p>
+            </a>
+            <a href="/properties?search=Bengaluru" class="city-card glass-panel text-center">
+                <div class="city-emoji">🏢</div>
+                <h3>Bengaluru</h3>
+                <p>1,950 Properties</p>
+            </a>
+            <a href="/properties?search=Hyderabad" class="city-card glass-panel text-center">
+                <div class="city-emoji">🌇</div>
+                <h3>Hyderabad</h3>
+                <p>1,340 Properties</p>
+            </a>
+        </div>
+        <div class="grid grid-cols-4 mt-2">
+            <a href="/properties?search=Pune" class="city-card glass-panel text-center">
+                <div class="city-emoji">🏛️</div>
+                <h3>Pune</h3>
+                <p>980 Properties</p>
+            </a>
+            <a href="/properties?search=Chennai" class="city-card glass-panel text-center">
+                <div class="city-emoji">🌴</div>
+                <h3>Chennai</h3>
+                <p>870 Properties</p>
+            </a>
+            <a href="/properties?search=Ahmedabad" class="city-card glass-panel text-center">
+                <div class="city-emoji">🏗️</div>
+                <h3>Ahmedabad</h3>
+                <p>640 Properties</p>
+            </a>
+            <a href="/properties?search=Goa" class="city-card glass-panel text-center">
+                <div class="city-emoji">🌊</div>
+                <h3>Goa</h3>
+                <p>430 Properties</p>
+            </a>
+        </div>
+    </section>
+
+    <%- include('../partials/footer') %>
+</body>
+</html>

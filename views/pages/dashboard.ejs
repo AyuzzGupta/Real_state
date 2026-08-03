@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+    <style>
+        .dashboard-header {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .dashboard-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .menu-item {
+            padding: 1rem;
+            border-radius: var(--border-radius-sm);
+            color: var(--text-primary);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+        }
+        .menu-item:hover, .menu-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        .profile-card {
+            text-align: center;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin: 0 auto 1rem;
+            box-shadow: 0 8px 20px rgba(79, 125, 253, 0.3);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <!-- Breadcrumbs -->
+    <%- include('../partials/breadcrumbs') %>
+
+    <div class="container dashboard-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
+            <div>
+                <h1 style="font-size: 2.2rem; margin-bottom: 0.25rem;">Welcome back, <%= user.fullName %>!</h1>
+                <p style="margin: 0;">Manage your account details and saved favorite properties.</p>
+            </div>
+            <% if (user.role === 'admin') { %>
+                <a href="/admin/dashboard" class="btn btn-primary"><i class="fa-solid fa-shield-halved"></i> Open Admin Panel</a>
+            <% } %>
+        </div>
+    </div>
+
+    <% const currentTab = (typeof activeTab !== 'undefined' && activeTab) ? activeTab : 'profile'; %>
+
+    <div class="container grid grid-cols-4" style="margin-bottom: 4rem;">
+        <!-- Left Sidebar Navigation -->
+        <div>
+            <div class="glass-panel profile-card">
+                <div class="profile-avatar">
+                    <%= user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U' %>
+                </div>
+                <h3><%= user.fullName %></h3>
+                <p style="margin: 0; font-size: 0.9rem;"><%= user.email %></p>
+                <div class="badge" style="position: relative; display: inline-block; margin-top: 0.8rem; top: auto; left: auto;"><%= user.role.toUpperCase() %></div>
+            </div>
+            
+            <div class="glass-panel" style="padding: 0.8rem;">
+                <div class="dashboard-menu">
+                    <a href="/dashboard?tab=profile" class="menu-item <%= currentTab === 'profile' ? 'active' : '' %>">
+                        <i class="fa-solid fa-user"></i> My Profile
+                    </a>
+                    <a href="/dashboard?tab=favorites" class="menu-item <%= currentTab === 'favorites' ? 'active' : '' %>">
+                        <i class="fa-solid fa-heart"></i> My Favourites
+                    </a>
+                    <a href="/dashboard?tab=visits" class="menu-item <%= currentTab === 'visits' ? 'active' : '' %>">
+                        <i class="fa-solid fa-calendar"></i> Scheduled Visits
+                    </a>
+                    <% if (user.role === 'admin') { %>
+                        <a href="/admin/dashboard" class="menu-item" style="color: var(--accent-color);">
+                            <i class="fa-solid fa-shield-halved"></i> Admin Control
+                        </a>
+                    <% } %>
+                    <a href="/logout" class="menu-item" style="color: var(--danger-color);">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Main Panel -->
+        <div style="grid-column: span 3;">
+            <!-- Profile Tab -->
+            <div class="tab-content <%= currentTab === 'profile' ? 'active' : '' %>">
+                <div class="glass-panel" style="padding: 2rem;">
+                    <h2 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-user text-primary mr-1"></i> Personal Information</h2>
+                    <form onsubmit="event.preventDefault(); showToast('Profile details updated!', 'success');">
+                        <div class="grid grid-cols-2">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" value="<%= user.fullName %>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control" value="<%= user.email %>" readonly style="opacity: 0.7;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" value="<%= user.phone || '+1 234 567 890' %>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Account Role</label>
+                                <input type="text" class="form-control" value="<%= user.role.toUpperCase() %>" readonly style="opacity: 0.7;">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Changes</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Favorites Tab -->
+            <div class="tab-content <%= currentTab === 'favorites' ? 'active' : '' %>">
+                <div class="glass-panel" style="padding: 2rem;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h2 style="margin: 0;"><i class="fa-solid fa-heart text-danger mr-1"></i> Saved Favorite Properties</h2>
+                        <span class="badge" style="position: static;"><%= favorites ? favorites.length : 0 %> Saved</span>
+                    </div>
+
+                    <% if (favorites && favorites.length > 0) { %>
+                        <div class="grid grid-cols-2 favorites-grid">
+                            <% favorites.forEach(property => { %>
+                                <div class="property-card glass-panel" onclick="window.location.href='/properties/<%= property._id %>'" style="cursor: pointer;">
+                                    <span class="badge"><%= property.category %></span>
+                                    
+                                    <button class="card-fav-btn active" onclick="toggleFavorite(event, '<%= property._id %>')" title="Remove Favorite">
+                                        <i class="fa-solid fa-heart"></i>
+                                    </button>
+
+                                    <div class="property-image-wrapper">
+                                        <img src="<%= property.images && property.images[0] ? property.images[0] : 'https://via.placeholder.com/400x300' %>" alt="<%= property.title %>" class="property-image">
+                                    </div>
+
+                                    <div class="property-content">
+                                        <div class="property-price">$<%= property.price.toLocaleString() %></div>
+                                        <h3 class="property-title"><%= property.title %></h3>
+                                        <div class="property-location"><i class="fa-solid fa-location-dot"></i> <%= property.location %></div>
+                                        <div class="property-features">
+                                            <span><i class="fa-solid fa-bed"></i> <%= property.bedrooms %> Beds</span>
+                                            <span><i class="fa-solid fa-bath"></i> <%= property.bathrooms %> Baths</span>
+                                            <span><i class="fa-solid fa-vector-square"></i> <%= property.area %> sqft</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center" style="padding: 3rem 0; color: var(--text-secondary);">
+                            <i class="fa-regular fa-heart" style="font-size: 3.5rem; margin-bottom: 1rem; color: var(--text-secondary);"></i>
+                            <h3>No favorite properties added yet</h3>
+                            <p>Browse our listing collection and click the heart icon to save properties here.</p>
+                            <a href="/properties" class="btn btn-primary mt-1"><i class="fa-solid fa-magnifying-glass"></i> Explore Properties</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Scheduled Visits Tab -->
+            <div class="tab-content <%= currentTab === 'visits' ? 'active' : '' %>">
+                <div class="glass-panel" style="padding: 2rem;">
+                    <h2 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-calendar-check text-primary mr-1"></i> Scheduled Property Visits</h2>
+                    <div class="text-center" style="padding: 3rem 0; color: var(--text-secondary);">
+                        <i class="fa-solid fa-calendar-days" style="font-size: 3.5rem; margin-bottom: 1rem; color: var(--text-secondary);"></i>
+                        <h3>No upcoming visits scheduled</h3>
+                        <p>You can request site visits directly on any property detail page.</p>
+                        <a href="/properties" class="btn btn-outline mt-1"><i class="fa-solid fa-house"></i> View Available Properties</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+</body>
+</html>

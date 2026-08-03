@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+    <style>
+        .main-image {
+            width: 100%;
+            height: 480px;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .gallery img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+        .gallery img:hover, .gallery img.active {
+            border-color: var(--primary-color);
+            transform: scale(1.03);
+        }
+        .feature-box {
+            padding: 1.5rem;
+            text-align: center;
+            border-radius: var(--border-radius-sm);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+        }
+        .feature-box i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        .agent-card {
+            padding: 2rem;
+            text-align: center;
+        }
+        .agent-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 auto 1rem;
+            box-shadow: 0 8px 20px rgba(79, 125, 253, 0.3);
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 18, 32, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-card {
+            width: 100%;
+            max-width: 550px;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <!-- Breadcrumbs -->
+    <%- include('../partials/breadcrumbs') %>
+
+    <div class="container" style="margin-bottom: 4rem;">
+        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
+            <div>
+                <span class="badge" style="position: static; margin-bottom: 0.5rem; display: inline-block;"><%= property.category %></span>
+                <h1 style="margin-bottom: 0.25rem;"><%= property.title %></h1>
+                <p style="font-size: 1.1rem; margin: 0;"><i class="fa-solid fa-location-dot"></i> <%= property.location %></p>
+            </div>
+            <div class="text-right">
+                <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent-color);">$<%= property.price.toLocaleString() %></div>
+                <div class="d-flex gap-1 justify-content-end mt-1">
+                    <button class="btn btn-outline <%= isFavorite ? 'active' : '' %>" id="detailFavBtn" onclick="toggleFavorite(event, '<%= property._id %>')" style="<%= isFavorite ? 'border-color: #ef4444; color: #ef4444;' : '' %>">
+                        <i class="fa-<%= isFavorite ? 'solid' : 'regular' %> fa-heart"></i> <%= isFavorite ? 'Favourited' : 'Add to Favourite' %>
+                    </button>
+                    <button class="btn btn-outline" onclick="copyToClipboard(window.location.href, 'Property link copied to clipboard!')" title="Share Property">
+                        <i class="fa-solid fa-share-nodes"></i> Share
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-4 mt-2">
+            <div style="grid-column: span 3;">
+                <img src="<%= property.images[0] || 'https://via.placeholder.com/1200x800' %>" alt="<%= property.title %>" class="main-image" id="mainImg">
+                
+                <% if (property.images && property.images.length > 1) { %>
+                <div class="gallery">
+                    <% property.images.forEach((img, idx) => { %>
+                        <img src="<%= img %>" alt="Gallery Image" class="<%= idx === 0 ? 'active' : '' %>" onclick="document.getElementById('mainImg').src=this.src; document.querySelectorAll('.gallery img').forEach(i => i.classList.remove('active')); this.classList.add('active');">
+                    <% }) %>
+                </div>
+                <% } %>
+
+                <div class="glass-panel" style="padding: 2rem; margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-align-left text-primary mr-1"></i> Description</h3>
+                    <p style="white-space: pre-line; line-height: 1.8; font-size: 1.05rem;"><%= property.description %></p>
+                </div>
+
+                <div class="glass-panel" style="padding: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-list-check text-primary mr-1"></i> Property Overview</h3>
+                    <div class="grid grid-cols-4">
+                        <div class="feature-box">
+                            <i class="fa-solid fa-bed"></i>
+                            <h4><%= property.bedrooms %></h4>
+                            <p style="margin: 0;">Bedrooms</p>
+                        </div>
+                        <div class="feature-box">
+                            <i class="fa-solid fa-bath"></i>
+                            <h4><%= property.bathrooms %></h4>
+                            <p style="margin: 0;">Bathrooms</p>
+                        </div>
+                        <div class="feature-box">
+                            <i class="fa-solid fa-vector-square"></i>
+                            <h4><%= property.area %></h4>
+                            <p style="margin: 0;">Sq. Feet</p>
+                        </div>
+                        <div class="feature-box">
+                            <i class="fa-solid fa-car"></i>
+                            <h4>Available</h4>
+                            <p style="margin: 0;">Parking Slot</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="glass-panel agent-card" style="position: sticky; top: 100px;">
+                    <div class="agent-avatar">
+                        <%= property.ownerName ? property.ownerName.charAt(0).toUpperCase() : 'O' %>
+                    </div>
+                    <h3><%= property.ownerName %></h3>
+                    <p style="margin-bottom: 1.5rem;"><i class="fa-solid fa-user-shield"></i> Verified Property Owner</p>
+                    
+                    <button class="btn btn-primary mb-1" style="width: 100%;" onclick="copyToClipboard('<%= property.ownerPhone %>', 'Owner Phone Number (<%= property.ownerPhone %>) copied to clipboard!')">
+                        <i class="fa-solid fa-phone"></i> Show / Copy Phone
+                    </button>
+                    
+                    <button class="btn btn-outline mb-1" style="width: 100%;" onclick="openModal('sendMessageModal')">
+                        <i class="fa-solid fa-envelope"></i> Send Message
+                    </button>
+                    
+                    <button class="btn btn-outline" style="width: 100%;" onclick="openModal('scheduleVisitModal')">
+                        <i class="fa-regular fa-calendar-check"></i> Schedule Visit
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <% if (related && related.length > 0) { %>
+        <div class="mt-3 mb-3">
+            <h2 class="mb-2">Similar Properties</h2>
+            <div class="grid grid-cols-3">
+                <% related.forEach(prop => { %>
+                    <% const isRelFav = typeof userFavorites !== 'undefined' && userFavorites.includes(prop._id.toString()); %>
+                    <div class="property-card glass-panel" onclick="window.location.href='/properties/<%= prop._id %>'" style="cursor: pointer;">
+                        <span class="badge"><%= prop.category %></span>
+                        
+                        <button class="card-fav-btn <%= isRelFav ? 'active' : '' %>" onclick="toggleFavorite(event, '<%= prop._id %>')" title="Toggle Favorite">
+                            <i class="fa-<%= isRelFav ? 'solid' : 'regular' %> fa-heart"></i>
+                        </button>
+
+                        <div class="property-image-wrapper">
+                            <img src="<%= prop.images[0] || 'https://via.placeholder.com/400x300' %>" alt="<%= prop.title %>" class="property-image">
+                        </div>
+
+                        <div class="property-content">
+                            <div class="property-price">$<%= prop.price.toLocaleString() %></div>
+                            <h3 class="property-title"><%= prop.title %></h3>
+                            <div class="property-location"><i class="fa-solid fa-location-dot"></i> <%= prop.location %></div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- Send Message Modal -->
+    <div class="modal-overlay" id="sendMessageModal">
+        <div class="glass-panel modal-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h3>Contact <%= property.ownerName %></h3>
+                <button class="btn btn-outline" style="padding: 0.4rem 0.8rem;" onclick="closeModal('sendMessageModal')"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <form onsubmit="event.preventDefault(); showToast('Your message has been sent to <%= property.ownerName %>!', 'success'); closeModal('sendMessageModal');">
+                <div class="form-group">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" class="form-control" value="<%= user ? user.fullName : '' %>" required placeholder="Enter full name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Your Email or Phone</label>
+                    <input type="text" class="form-control" value="<%= user ? user.email : '' %>" required placeholder="Enter contact information">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message</label>
+                    <textarea class="form-control" rows="4" required placeholder="Hi, I am interested in <%= property.title %> located at <%= property.location %>..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-paper-plane"></i> Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Schedule Visit Modal -->
+    <div class="modal-overlay" id="scheduleVisitModal">
+        <div class="glass-panel modal-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h3>Schedule Property Visit</h3>
+                <button class="btn btn-outline" style="padding: 0.4rem 0.8rem;" onclick="closeModal('scheduleVisitModal')"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <form onsubmit="event.preventDefault(); showToast('Visit request submitted! Owner will confirm your slot.', 'success'); closeModal('scheduleVisitModal');">
+                <div class="form-group">
+                    <label class="form-label">Preferred Date</label>
+                    <input type="date" class="form-control" required min="<%= new Date().toISOString().split('T')[0] %>">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Preferred Time Slot</label>
+                    <select class="form-control" required>
+                        <option value="Morning (9 AM - 12 PM)">Morning (9 AM - 12 PM)</option>
+                        <option value="Afternoon (12 PM - 4 PM)">Afternoon (12 PM - 4 PM)</option>
+                        <option value="Evening (4 PM - 7 PM)">Evening (4 PM - 7 PM)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes for Owner</label>
+                    <input type="text" class="form-control" placeholder="Any specific questions or preferences...">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-calendar-check"></i> Confirm Schedule</button>
+            </form>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+</body>
+</html>

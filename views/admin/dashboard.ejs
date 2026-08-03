@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+    <style>
+        .dashboard-header {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .stat-card {
+            padding: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .stat-card i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            opacity: 0.9;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+        }
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <!-- Breadcrumbs -->
+    <%- include('../partials/breadcrumbs') %>
+
+    <div class="container dashboard-header d-flex justify-content-between align-items-center flex-wrap gap-1">
+        <div>
+            <h1 style="font-size: 2.2rem; margin-bottom: 0.25rem;">Admin Control Panel</h1>
+            <p style="margin: 0;">Manage platform property listings and user permissions.</p>
+        </div>
+        <div class="d-flex gap-1">
+            <a href="/dashboard" class="btn btn-outline"><i class="fa-solid fa-user"></i> User Profile</a>
+            <button class="btn btn-primary" onclick="document.getElementById('addPropertyModal').style.display='flex'"><i class="fa-solid fa-plus"></i> Add New Property</button>
+        </div>
+    </div>
+
+    <!-- Key Statistics Grid -->
+    <div class="container grid grid-cols-3 mb-3">
+        <div class="glass-panel stat-card">
+            <div>
+                <p style="margin: 0; color: var(--text-secondary);">Total Listings</p>
+                <h2 style="font-size: 2.2rem; margin: 0;"><%= stats.properties %></h2>
+            </div>
+            <i class="fa-solid fa-building"></i>
+        </div>
+        <div class="glass-panel stat-card">
+            <div>
+                <p style="margin: 0; color: var(--text-secondary);">Registered Users</p>
+                <h2 style="font-size: 2.2rem; margin: 0;"><%= stats.users %></h2>
+            </div>
+            <i class="fa-solid fa-users"></i>
+        </div>
+        <div class="glass-panel stat-card">
+            <div>
+                <p style="margin: 0; color: var(--text-secondary);">Platform Revenue</p>
+                <h2 style="font-size: 2.2rem; margin: 0; color: var(--success-color);">$12,450</h2>
+            </div>
+            <i class="fa-solid fa-chart-line"></i>
+        </div>
+    </div>
+
+    <!-- Manage Properties Table -->
+    <div class="container mb-4">
+        <div class="glass-panel" style="padding: 2rem;">
+            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
+                <h2><i class="fa-solid fa-list-check text-primary mr-1"></i> Manage Property Listings</h2>
+                <input type="text" id="tableSearchInput" class="form-control" placeholder="Quick search listings..." style="max-width: 250px;" onkeyup="filterTable()">
+            </div>
+            
+            <div class="table-container">
+                <table id="adminTable">
+                    <thead>
+                        <tr>
+                            <th>Preview</th>
+                            <th>Title & Location</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Owner Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (properties && properties.length > 0) { %>
+                            <% properties.forEach(property => { %>
+                                <tr>
+                                    <td>
+                                        <img src="<%= property.images[0] || 'https://via.placeholder.com/50' %>" style="width: 50px; height: 50px; border-radius: var(--border-radius-sm); object-fit: cover;">
+                                    </td>
+                                    <td>
+                                        <strong><%= property.title %></strong>
+                                        <div style="font-size: 0.8rem; color: var(--text-secondary);"><i class="fa-solid fa-location-dot"></i> <%= property.location %></div>
+                                    </td>
+                                    <td><span style="background: var(--primary-color); padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;"><%= property.category %></span></td>
+                                    <td style="color: var(--accent-color); font-weight: 600;">$<%= property.price.toLocaleString() %></td>
+                                    <td><%= property.ownerName %></td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            <a href="/properties/<%= property._id %>" class="btn btn-outline" style="padding: 0.4rem 0.8rem;" title="View Live Detail"><i class="fa-solid fa-eye"></i></a>
+                                            <form action="/admin/properties/<%= property._id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this property listing?');">
+                                                <button type="submit" class="btn" style="background: rgba(239, 68, 68, 0.2); color: var(--danger-color); padding: 0.4rem 0.8rem;" title="Delete Property"><i class="fa-solid fa-trash"></i></button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" class="text-center" style="padding: 2rem;">No property listings found. Click "Add New Property" to get started.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Property Modal -->
+    <div id="addPropertyModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+        <div class="glass-panel" style="width: 100%; max-width: 800px; padding: 2rem; max-height: 90vh; overflow-y: auto;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h2>Add New Property Listing</h2>
+                <button class="btn btn-outline" onclick="document.getElementById('addPropertyModal').style.display='none'"><i class="fa-solid fa-times"></i></button>
+            </div>
+            
+            <form action="/admin/properties" method="POST" enctype="multipart/form-data">
+                <div class="grid grid-cols-2">
+                    <div class="form-group">
+                        <label class="form-label">Property Title</label>
+                        <input type="text" name="title" class="form-control" required placeholder="e.g. Modern Luxury Villa">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-control" required>
+                            <option value="Apartment">Apartment</option>
+                            <option value="House">House</option>
+                            <option value="Villa">Villa</option>
+                            <option value="Commercial">Commercial</option>
+                            <option value="Land">Land</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Price ($)</label>
+                        <input type="number" name="price" class="form-control" required placeholder="e.g. 450000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Location (City, Area)</label>
+                        <input type="text" name="location" class="form-control" required placeholder="e.g. Bandra, Mumbai">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bedrooms</label>
+                        <input type="number" name="bedrooms" class="form-control" required value="3">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bathrooms</label>
+                        <input type="number" name="bathrooms" class="form-control" required value="2">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Area (sq ft)</label>
+                        <input type="number" name="area" class="form-control" required value="1800">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Property Images (Max 5)</label>
+                        <input type="file" name="images" class="form-control" multiple accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Owner Name</label>
+                        <input type="text" name="ownerName" class="form-control" required placeholder="Owner or Agent Name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Owner Contact Phone</label>
+                        <input type="text" name="ownerPhone" class="form-control" required placeholder="+1 234 567 890">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="4" required placeholder="Write property features, amenities, nearby facilities..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-save"></i> Save Property Listing</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function filterTable() {
+            const input = document.getElementById("tableSearchInput");
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById("adminTable");
+            const tr = table.getElementsByTagName("tr");
+            for (let i = 1; i < tr.length; i++) {
+                let text = tr[i].textContent || tr[i].innerText;
+                if (text.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+
+    <%- include('../partials/footer') %>
+</body>
+</html>

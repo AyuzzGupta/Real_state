@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+    <style>
+        .error-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .error-content h1 {
+            font-size: 8rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <div class="error-container container">
+        <div class="error-content">
+            <h1>404</h1>
+            <h2 style="font-size: 2rem; margin-bottom: 1rem;">Page Not Found</h2>
+            <p style="margin-bottom: 2rem; font-size: 1.2rem;">The page you are looking for doesn't exist or has been moved.</p>
+            <a href="/" class="btn btn-primary">Go Back Home</a>
+        </div>
+    </div>
+
+</body>
+</html>

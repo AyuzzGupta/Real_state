@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+    <style>
+        .page-header {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .filters-section {
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+        }
+        .page-link {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--border-radius-sm);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .page-link:hover, .page-link.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        .active-filter-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            background: rgba(79, 125, 253, 0.2);
+            border: 1px solid var(--primary-color);
+            font-size: 0.8rem;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+
+    <!-- Breadcrumbs -->
+    <%- include('../partials/breadcrumbs') %>
+
+    <div class="page-header container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
+            <div>
+                <h1 style="font-size: 2.2rem; margin-bottom: 0.25rem;">Explore Properties</h1>
+                <p style="margin: 0;">Showing <%= total %> verified property listings</p>
+            </div>
+            <% if (query && (query.search || query.category || query.minPrice || query.maxPrice || query.sort)) { %>
+                <a href="/properties" class="btn btn-outline" style="font-size: 0.875rem;"><i class="fa-solid fa-rotate-left"></i> Reset All Filters</a>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Filters Toolbar -->
+        <div class="glass-panel filters-section">
+            <form action="/properties" method="GET">
+                <!-- Category Pills Bar -->
+                <div class="category-pills mb-2">
+                    <a href="/properties<%= query.search ? '?search=' + encodeURIComponent(query.search) : '' %>" class="category-pill <%= !query.category ? 'active' : '' %>">
+                        <i class="fa-solid fa-border-all"></i> All Types
+                    </a>
+                    <a href="/properties?category=Apartment<%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %>" class="category-pill <%= query.category === 'Apartment' ? 'active' : '' %>">
+                        <i class="fa-solid fa-building"></i> Apartment
+                    </a>
+                    <a href="/properties?category=House<%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %>" class="category-pill <%= query.category === 'House' ? 'active' : '' %>">
+                        <i class="fa-solid fa-house"></i> House
+                    </a>
+                    <a href="/properties?category=Villa<%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %>" class="category-pill <%= query.category === 'Villa' ? 'active' : '' %>">
+                        <i class="fa-solid fa-hotel"></i> Villa
+                    </a>
+                    <a href="/properties?category=Commercial<%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %>" class="category-pill <%= query.category === 'Commercial' ? 'active' : '' %>">
+                        <i class="fa-solid fa-store"></i> Commercial
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-4 align-items-center gap-1">
+                    <div>
+                        <label class="form-label" style="font-size: 0.85rem;">Search Location / Name</label>
+                        <div style="position: relative;">
+                            <input type="text" name="search" class="form-control" placeholder="Search city or property..." value="<%= query.search || '' %>">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label" style="font-size: 0.85rem;">Category Type</label>
+                        <select name="category" class="form-control">
+                            <option value="">All Categories</option>
+                            <option value="Apartment" <%= query.category === 'Apartment' ? 'selected' : '' %>>Apartment</option>
+                            <option value="House" <%= query.category === 'House' ? 'selected' : '' %>>House</option>
+                            <option value="Villa" <%= query.category === 'Villa' ? 'selected' : '' %>>Villa</option>
+                            <option value="Commercial" <%= query.category === 'Commercial' ? 'selected' : '' %>>Commercial</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" style="font-size: 0.85rem;">Price Range ($)</label>
+                        <div class="d-flex gap-1">
+                            <input type="number" name="minPrice" class="form-control" placeholder="Min" value="<%= query.minPrice || '' %>">
+                            <input type="number" name="maxPrice" class="form-control" placeholder="Max" value="<%= query.maxPrice || '' %>">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label" style="font-size: 0.85rem;">Sort Order</label>
+                        <div class="d-flex gap-1">
+                            <select name="sort" class="form-control">
+                                <option value="newest" <%= query.sort === 'newest' ? 'selected' : '' %>>Newest First</option>
+                                <option value="cheapest" <%= query.sort === 'cheapest' ? 'selected' : '' %>>Price: Low to High</option>
+                                <option value="expensive" <%= query.sort === 'expensive' ? 'selected' : '' %>>Price: High to Low</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary" title="Apply Filters"><i class="fa-solid fa-filter"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Property Grid -->
+        <div class="grid grid-cols-3">
+            <% if (properties && properties.length > 0) { %>
+                <% properties.forEach(property => { %>
+                    <% const isFav = typeof userFavorites !== 'undefined' && userFavorites.includes(property._id.toString()); %>
+                    <div class="property-card glass-panel" onclick="window.location.href='/properties/<%= property._id %>'" style="cursor: pointer;">
+                        <span class="badge"><%= property.category %></span>
+                        
+                        <button class="card-fav-btn <%= isFav ? 'active' : '' %>" onclick="toggleFavorite(event, '<%= property._id %>')" title="Toggle Favorite">
+                            <i class="fa-<%= isFav ? 'solid' : 'regular' %> fa-heart"></i>
+                        </button>
+
+                        <div class="property-image-wrapper">
+                            <img src="<%= property.images[0] || 'https://via.placeholder.com/400x300' %>" alt="<%= property.title %>" class="property-image">
+                        </div>
+
+                        <div class="property-content">
+                            <div class="property-price">$<%= property.price.toLocaleString() %></div>
+                            <h3 class="property-title"><%= property.title %></h3>
+                            <div class="property-location"><i class="fa-solid fa-location-dot"></i> <%= property.location %></div>
+                            <div class="property-features">
+                                <span><i class="fa-solid fa-bed"></i> <%= property.bedrooms %> Beds</span>
+                                <span><i class="fa-solid fa-bath"></i> <%= property.bathrooms %> Baths</span>
+                                <span><i class="fa-solid fa-vector-square"></i> <%= property.area %> sqft</span>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="glass-panel text-center" style="grid-column: 1 / -1; padding: 4rem;">
+                    <i class="fa-solid fa-house-circle-exclamation" style="font-size: 3.5rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
+                    <h3>No properties match your filter criteria</h3>
+                    <p>Try adjusting your search terms or clearing your price filters.</p>
+                    <a href="/properties" class="btn btn-outline mt-1"><i class="fa-solid fa-arrows-rotate"></i> Clear Filters</a>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pages > 1) { %>
+            <div class="pagination">
+                <% for (let i = 1; i <= pages; i++) { %>
+                    <% 
+                        let qs = `?page=${i}`;
+                        if (query.search) qs += `&search=${encodeURIComponent(query.search)}`;
+                        if (query.category) qs += `&category=${encodeURIComponent(query.category)}`;
+                        if (query.minPrice) qs += `&minPrice=${query.minPrice}`;
+                        if (query.maxPrice) qs += `&maxPrice=${query.maxPrice}`;
+                        if (query.sort) qs += `&sort=${query.sort}`;
+                    %>
+                    <a href="/properties<%= qs %>" class="page-link <%= page === i ? 'active' : '' %>"><%= i %></a>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+
+    <%- include('../partials/footer') %>
+</body>
+</html>

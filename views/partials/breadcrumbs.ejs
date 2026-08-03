@@ -1,0 +1,24 @@
+<% if (typeof breadcrumbs !== 'undefined' && breadcrumbs && breadcrumbs.length > 0) { %>
+<nav class="breadcrumbs-nav" aria-label="Breadcrumb">
+    <div class="container">
+        <ul class="breadcrumbs-list">
+            <% breadcrumbs.forEach((crumb, index) => { %>
+                <li class="breadcrumb-item <%= index === breadcrumbs.length - 1 ? 'active' : '' %>">
+                    <% if (crumb.url && index < breadcrumbs.length - 1) { %>
+                        <a href="<%= crumb.url %>" class="breadcrumb-link">
+                            <% if (index === 0) { %><i class="fa-solid fa-house mr-1"></i><% } %>
+                            <%= crumb.title %>
+                        </a>
+                        <i class="fa-solid fa-chevron-right breadcrumb-separator"></i>
+                    <% } else { %>
+                        <span class="breadcrumb-current">
+                            <% if (index === 0) { %><i class="fa-solid fa-house mr-1"></i><% } %>
+                            <%= crumb.title %>
+                        </span>
+                    <% } %>
+                </li>
+            <% }) %>
+        </ul>
+    </div>
+</nav>
+<% } %>

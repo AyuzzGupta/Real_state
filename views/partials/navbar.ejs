@@ -1,0 +1,53 @@
+<nav class="navbar" id="navbar">
+    <div class="container nav-content">
+        <a href="/" class="logo">
+            <i class="fa-solid fa-building"></i>
+            Real<span>State</span>
+        </a>
+        
+        <div class="nav-links">
+            <a href="/" class="nav-link <%= path === '/' ? 'active' : '' %>"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="/properties" class="nav-link <%= path === '/properties' ? 'active' : '' %>"><i class="fa-solid fa-list"></i> Properties</a>
+            
+            <% if (user) { %>
+                <a href="/favorites" class="nav-link <%= path === '/favorites' ? 'active' : '' %>"><i class="fa-solid fa-heart"></i> Favourites</a>
+                <a href="/dashboard" class="nav-link <%= path === '/dashboard' && !path.startsWith('/admin') ? 'active' : '' %>"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+                
+                <% if (user.role === 'admin') { %>
+                    <a href="/admin/dashboard" class="nav-link <%= path === '/admin/dashboard' ? 'active' : '' %>"><i class="fa-solid fa-shield-halved"></i> Admin</a>
+                <% } %>
+
+                <div class="nav-user-dropdown" id="userDropdownContainer">
+                    <button class="nav-user-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false">
+                        <span class="user-avatar-sm"><%= user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U' %></span>
+                        <span class="user-name-sm"><%= user.fullName.split(' ')[0] %></span>
+                        <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-menu" id="userDropdownMenu">
+                        <div class="dropdown-header">
+                            <div class="user-avatar-md"><%= user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U' %></div>
+                            <div>
+                                <strong><%= user.fullName %></strong>
+                                <small><%= user.email %></small>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="/dashboard?tab=profile" class="dropdown-item"><i class="fa-solid fa-user"></i> My Profile</a>
+                        <a href="/favorites" class="dropdown-item"><i class="fa-solid fa-heart"></i> My Favourites</a>
+                        <a href="/dashboard?tab=visits" class="dropdown-item"><i class="fa-solid fa-calendar-check"></i> Scheduled Visits</a>
+                        <% if (user.role === 'admin') { %>
+                            <div class="dropdown-divider"></div>
+                            <a href="/admin/dashboard" class="dropdown-item text-admin"><i class="fa-solid fa-shield-halved"></i> Admin Control Panel</a>
+                        <% } %>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/login" class="nav-link <%= path === '/login' ? 'active' : '' %>">Login</a>
+                <a href="/register" class="btn btn-primary">Sign Up</a>
+            <% } %>
+        </div>
+    </div>
+</nav>
+
