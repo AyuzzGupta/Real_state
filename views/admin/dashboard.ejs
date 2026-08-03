@@ -75,7 +75,7 @@
         <div class="glass-panel stat-card">
             <div>
                 <p style="margin: 0; color: var(--text-secondary);">Platform Revenue</p>
-                <h2 style="font-size: 2.2rem; margin: 0; color: var(--success-color);">$12,450</h2>
+                <h2 style="font-size: 2.2rem; margin: 0; color: var(--success-color);">₹12,45,000</h2>
             </div>
             <i class="fa-solid fa-chart-line"></i>
         </div>
@@ -113,7 +113,7 @@
                                         <div style="font-size: 0.8rem; color: var(--text-secondary);"><i class="fa-solid fa-location-dot"></i> <%= property.location %></div>
                                     </td>
                                     <td><span style="background: var(--primary-color); padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;"><%= property.category %></span></td>
-                                    <td style="color: var(--accent-color); font-weight: 600;">$<%= property.price.toLocaleString() %></td>
+                                    <td style="color: var(--accent-color); font-weight: 600;">₹<%= property.price.toLocaleString('en-IN') %></td>
                                     <td><%= property.ownerName %></td>
                                     <td>
                                         <div class="d-flex gap-1">
@@ -161,7 +161,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Price ($)</label>
+                        <label class="form-label">Price (₹)</label>
                         <input type="number" name="price" class="form-control" required placeholder="e.g. 450000">
                     </div>
                     <div class="form-group">

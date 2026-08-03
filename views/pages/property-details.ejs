@@ -94,7 +94,7 @@
                 <p style="font-size: 1.1rem; margin: 0;"><i class="fa-solid fa-location-dot"></i> <%= property.location %></p>
             </div>
             <div class="text-right">
-                <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent-color);">$<%= property.price.toLocaleString() %></div>
+                <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent-color);">₹<%= property.price.toLocaleString('en-IN') %></div>
                 <div class="d-flex gap-1 justify-content-end mt-1">
                     <button class="btn btn-outline <%= isFavorite ? 'active' : '' %>" id="detailFavBtn" onclick="toggleFavorite(event, '<%= property._id %>')" style="<%= isFavorite ? 'border-color: #ef4444; color: #ef4444;' : '' %>">
                         <i class="fa-<%= isFavorite ? 'solid' : 'regular' %> fa-heart"></i> <%= isFavorite ? 'Favourited' : 'Add to Favourite' %>
@@ -191,7 +191,7 @@
                         </div>
 
                         <div class="property-content">
-                            <div class="property-price">$<%= prop.price.toLocaleString() %></div>
+                            <div class="property-price">₹<%= prop.price.toLocaleString('en-IN') %></div>
                             <h3 class="property-title"><%= prop.title %></h3>
                             <div class="property-location"><i class="fa-solid fa-location-dot"></i> <%= prop.location %></div>
                         </div>
