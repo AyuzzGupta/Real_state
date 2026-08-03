@@ -7,6 +7,7 @@ node_modules/
 
 # Recording & Private Guide
 RECORDING_GUIDE.md
+SCRIPT.txt
 
 # Logs
 npm-debug.log*
