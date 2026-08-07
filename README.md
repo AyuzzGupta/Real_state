@@ -47,8 +47,9 @@ npm install
 ### Step 5: Seed Sample Data & Admin Account
 To populate the database with realistic sample properties and create your default Admin user, run:
 ```bash
-node seeder.js
+npm run seed
 ```
+*or `node seeder.js`*
 *Output message:* `✅ Indian Data Imported Successfully!`
 
 ### Step 6: Start the Server

@@ -1,14 +1,22 @@
 {
   "name": "realstate",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Full-stack Real Estate Portal built with Node.js, Express, EJS, and MongoDB",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "seed": "node seeder.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "real-estate",
+    "express",
+    "nodejs",
+    "mongodb",
+    "ejs",
+    "glassmorphism"
+  ],
+  "author": "Ayush Gupta",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
