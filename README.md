@@ -182,3 +182,11 @@ REalstate/
 - **Templating Engine**: EJS (Embedded JavaScript)
 - **Styling**: Modern Vanilla CSS3 with Glassmorphism Design System
 - **Icons & Fonts**: FontAwesome 6, Google Fonts (Poppins)
+
+---
+
+## 📌 Project Maintenance
+
+- **Status**: Active & Maintained
+- **Last Updated**: August 10, 2026
+
